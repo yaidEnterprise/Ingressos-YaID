@@ -1,0 +1,434 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ──────────────────────────────────────────────
+   Design Tokens
+────────────────────────────────────────────── */
+:root {
+  --color-bg:          #06060f;
+  --color-surface:     #0d0d1f;
+  --color-surface-2:   #12122a;
+  --color-border:      rgba(130, 80, 255, 0.18);
+  --color-border-glow: rgba(130, 80, 255, 0.45);
+
+  --color-primary:     #8250ff;
+  --color-primary-2:   #a07cff;
+  --color-accent:      #ff3cac;
+  --color-accent-2:    #ff7eb3;
+  --color-gold:        #ffd166;
+  --color-gold-2:      #ffe8a3;
+
+  --color-success:     #2de6a6;
+  --color-danger:      #ff4b6e;
+
+  --color-text:        #f0eeff;
+  --color-text-muted:  #8a84b0;
+  --color-text-faint:  #4a4570;
+
+  --gradient-hero:     linear-gradient(135deg, #1a0538 0%, #06060f 50%, #0d0020 100%);
+  --gradient-card:     linear-gradient(145deg, rgba(130,80,255,0.08) 0%, rgba(255,60,172,0.05) 100%);
+  --gradient-btn:      linear-gradient(135deg, #8250ff 0%, #ff3cac 100%);
+  --gradient-gold:     linear-gradient(135deg, #ffd166 0%, #ff9d4d 100%);
+  --gradient-success:  linear-gradient(135deg, #2de6a6 0%, #0eb87a 100%);
+  --gradient-danger:   linear-gradient(135deg, #ff4b6e 0%, #c0152e 100%);
+
+  --shadow-glow:       0 0 40px rgba(130, 80, 255, 0.25);
+  --shadow-card:       0 8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-btn:        0 4px 20px rgba(130, 80, 255, 0.5);
+
+  --radius-sm:  8px;
+  --radius-md:  16px;
+  --radius-lg:  24px;
+  --radius-xl:  40px;
+
+  --font-main:  'Inter', sans-serif;
+  --font-alt:   'Space Grotesk', sans-serif;
+
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ──────────────────────────────────────────────
+   Reset & Base
+────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ──────────────────────────────────────────────
+   Layout utilities
+────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ──────────────────────────────────────────────
+   Background effects
+────────────────────────────────────────────── */
+.bg-gradient {
+  background: var(--gradient-hero);
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb--purple {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(130,80,255,0.18) 0%, transparent 70%);
+  top: -150px;
+  left: -100px;
+  animation: float-orb 8s ease-in-out infinite;
+}
+
+.bg-orb--pink {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255,60,172,0.12) 0%, transparent 70%);
+  bottom: -100px;
+  right: -80px;
+  animation: float-orb 10s ease-in-out infinite reverse;
+}
+
+.bg-orb--blue {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(80,120,255,0.1) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse-orb 6s ease-in-out infinite;
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-30px) scale(1.05); }
+}
+
+@keyframes pulse-orb {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* ──────────────────────────────────────────────
+   Card (glassmorphism)
+────────────────────────────────────────────── */
+.card {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  z-index: 1;
+  transition: var(--transition);
+}
+
+.card:hover {
+  border-color: var(--color-border-glow);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+/* ──────────────────────────────────────────────
+   Buttons
+────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-alt);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  padding: 16px 40px;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.08);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn:hover::after { opacity: 1; }
+
+.btn--primary {
+  background: var(--gradient-btn);
+  color: #fff;
+  box-shadow: var(--shadow-btn);
+}
+
+.btn--primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(130, 80, 255, 0.65), 0 4px 16px rgba(255,60,172,0.4);
+}
+
+.btn--primary:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--color-primary-2);
+  border: 1.5px solid var(--color-primary);
+}
+
+.btn--outline:hover {
+  background: rgba(130,80,255,0.12);
+  transform: translateY(-2px);
+}
+
+.btn--lg {
+  font-size: 1.125rem;
+  padding: 20px 52px;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ──────────────────────────────────────────────
+   Badge / Tag
+────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.badge--vip {
+  background: linear-gradient(135deg, rgba(255,209,102,0.15), rgba(255,209,102,0.08));
+  border: 1px solid rgba(255,209,102,0.4);
+  color: var(--color-gold);
+}
+
+.badge--live {
+  background: rgba(45,230,166,0.12);
+  border: 1px solid rgba(45,230,166,0.35);
+  color: var(--color-success);
+}
+
+.badge--live .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* ──────────────────────────────────────────────
+   Typography
+────────────────────────────────────────────── */
+.heading-xl {
+  font-family: var(--font-alt);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.heading-lg {
+  font-family: var(--font-alt);
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.heading-md {
+  font-family: var(--font-alt);
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.text-gradient {
+  background: var(--gradient-btn);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gold {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-muted { color: var(--color-text-muted); }
+
+/* ──────────────────────────────────────────────
+   Divider
+────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  margin: 32px 0;
+}
+
+/* ──────────────────────────────────────────────
+   Spinner / Loading
+────────────────────────────────────────────── */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(130,80,255,0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ──────────────────────────────────────────────
+   Success / Failure icons
+────────────────────────────────────────────── */
+.icon-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 32px;
+  animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.icon-circle--success {
+  background: radial-gradient(circle, rgba(45,230,166,0.2) 0%, transparent 70%);
+  border: 2px solid rgba(45,230,166,0.4);
+  box-shadow: 0 0 40px rgba(45,230,166,0.3);
+}
+
+.icon-circle--danger {
+  background: radial-gradient(circle, rgba(255,75,110,0.2) 0%, transparent 70%);
+  border: 2px solid rgba(255,75,110,0.4);
+  box-shadow: 0 0 40px rgba(255,75,110,0.3);
+}
+
+.icon-circle--waiting {
+  background: radial-gradient(circle, rgba(130,80,255,0.2) 0%, transparent 70%);
+  border: 2px solid rgba(130,80,255,0.4);
+  box-shadow: 0 0 40px rgba(130,80,255,0.3);
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ──────────────────────────────────────────────
+   Progress bar
+────────────────────────────────────────────── */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(130,80,255,0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--gradient-btn);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ──────────────────────────────────────────────
+   Ticket info row
+────────────────────────────────────────────── */
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.info-row + .info-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.info-row__label {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.info-row__value {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* ──────────────────────────────────────────────
+   Responsive
+────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+  .btn--lg { padding: 16px 32px; font-size: 1rem; }
+}
