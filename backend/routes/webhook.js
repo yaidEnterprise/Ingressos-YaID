@@ -12,7 +12,7 @@ const YAID_PUBLIC_KEY = process.env.YAID_PUBLIC_KEY;
  */
 async function atualizarStatusDoIngresso(externalReference, isApproved) {
   const novoStatus = isApproved ? 'approved' : 'rejected';
-  const result = stmts.updateStatus.run({ status: novoStatus, externalReference });
+  const result = stmts.updateStatus({ status: novoStatus, externalReference });
 
   if (result.changes === 0) {
     console.warn(`[Webhook] Pedido não encontrado para externalReference: ${externalReference}`);

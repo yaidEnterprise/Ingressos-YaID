@@ -15,7 +15,7 @@ router.get('/:id', (req, res) => {
       return res.status(400).json({ error: 'ID de pedido inválido.' });
     }
 
-    const order = stmts.getOrderById.get(id);
+    const order = stmts.getOrderById(id);
 
     if (!order) {
       return res.status(404).json({ error: 'Pedido não encontrado.' });
@@ -25,8 +25,8 @@ router.get('/:id', (req, res) => {
     return res.status(200).json({
       id: order.id,
       status: order.status,
-      createdAt: order.created_at,
-      updatedAt: order.updated_at,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
     });
   } catch (err) {
     console.error('[Status] Erro:', err);
