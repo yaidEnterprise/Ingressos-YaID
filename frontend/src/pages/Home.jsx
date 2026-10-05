@@ -30,9 +30,6 @@ export default function Home() {
     setLoading(true);
     setError(null);
 
-    // Abre uma aba em branco de forma síncrona no evento de clique para evitar bloqueio de pop-up
-    const newTab = window.open('about:blank', '_blank');
-
     try {
       const response = await fetch(`${API_URL}/api/checkout`, {
         method: 'POST',
@@ -42,21 +39,14 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (newTab) newTab.close();
         throw new Error(data.error || 'Erro ao iniciar checkout.');
       }
 
-      // Define o endereço da nova guia para o link da YaID
-      if (newTab) {
-        newTab.location.href = data.verificationUrl;
-      } else {
-        window.open(data.verificationUrl, '_blank');
-      }
-
-      // Navega a aba atual para a página de acompanhamento de pedido (/success)
-      navigate(`/success?orderId=${data.orderId}`);
+      // Navega para a página de redirecionamento intermediária
+      navigate(
+        `/redirecting?url=${encodeURIComponent(data.verificationUrl)}&orderId=${data.orderId}`
+      );
     } catch (err) {
-      if (newTab && !newTab.closed) newTab.close();
       console.error('[Checkout]', err);
       setError(err.message || 'Erro inesperado. Tente novamente.');
       setLoading(false);

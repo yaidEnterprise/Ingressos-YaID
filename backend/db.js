@@ -1,124 +1,89 @@
 /**
- * db.js — Persistência de dados usando LokiJS (JSON em arquivo local).
- * Não requer compilação nativa, funciona em qualquer ambiente Node.js.
- *
- * Substitui better-sqlite3 que exige Visual Studio/C++ Build Tools no Windows.
+ * db.js — Persistência de dados usando better-sqlite3 (SQLite nativo).
+ * Síncrono, rápido e sem dependências externas de runtime.
  */
 
-import Loki from 'lokijs';
+import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, 'orders.db.json');
+const DB_PATH = path.join(__dirname, 'orders.db');
 
-// Cria instância LokiJS com persistência automática em arquivo JSON
-const db = new Loki(DB_PATH, {
-  autosave: true,
-  autosaveInterval: 2000, // Salva a cada 2 segundos
-  autoload: true,
-  autoloadCallback: initDatabase,
-  serializationMethod: 'pretty',
-});
+// Abre (ou cria) o banco de dados SQLite
+const db = new Database(DB_PATH);
 
-let ordersCollection;
-
-function initDatabase() {
-  // Carrega ou cria a coleção de pedidos
-  ordersCollection = db.getCollection('orders');
-  if (!ordersCollection) {
-    ordersCollection = db.addCollection('orders', {
-      indices: ['id', 'externalReference'],
-      unique: ['id', 'externalReference'],
-    });
-    console.log('[DB] Coleção "orders" criada.');
-  } else {
-    console.log(`[DB] Coleção "orders" carregada (${ordersCollection.count()} pedidos).`);
-  }
-}
-
-// Aguarda o carregamento do banco antes de exportar os métodos
-function waitForDb() {
-  return new Promise((resolve) => {
-    if (ordersCollection) {
-      resolve();
-    } else {
-      // LokiJS autoload é síncrono internamente mas o callback pode ser async
-      setTimeout(() => {
-        if (!ordersCollection) initDatabase();
-        resolve();
-      }, 100);
-    }
-  });
-}
+// Configurações de performance
+db.pragma('journal_mode = WAL');
+db.pragma('synchronous = NORMAL');
 
 // ──────────────────────────────────────────────
-// API pública — equivalente aos stmts do SQLite
+// Criação da tabela (se não existir)
 // ──────────────────────────────────────────────
+db.exec(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id                TEXT PRIMARY KEY,
+    externalReference TEXT UNIQUE NOT NULL,
+    status            TEXT NOT NULL DEFAULT 'pending',
+    proofRequestId    TEXT,
+    verificationUrl   TEXT,
+    createdAt         INTEGER NOT NULL,
+    updatedAt         INTEGER NOT NULL
+  );
+`);
 
-export const dbReady = waitForDb();
+console.log('[DB] SQLite conectado →', DB_PATH);
+
+// ──────────────────────────────────────────────
+// Prepared statements — equivalente à API LokiJS
+// ──────────────────────────────────────────────
 
 export const stmts = {
   /**
    * Cria um novo pedido com status 'pending'.
    */
-  createOrder: ({ id, externalReference }) => {
-    if (!ordersCollection) initDatabase();
-    return ordersCollection.insert({
-      id,
-      externalReference,
-      status: 'pending',
-      proofRequestId: null,
-      verificationUrl: null,
-      createdAt: Math.floor(Date.now() / 1000),
-      updatedAt: Math.floor(Date.now() / 1000),
-    });
-  },
+  createOrder: db.prepare(`
+    INSERT INTO orders (id, externalReference, status, proofRequestId, verificationUrl, createdAt, updatedAt)
+    VALUES (@id, @externalReference, 'pending', NULL, NULL, @createdAt, @updatedAt)
+  `),
 
   /**
    * Atualiza o pedido com dados retornados pela YaID.
    */
-  updateProofRequest: ({ id, proofRequestId, verificationUrl }) => {
-    if (!ordersCollection) initDatabase();
-    const order = ordersCollection.findOne({ id });
-    if (order) {
-      order.proofRequestId = proofRequestId;
-      order.verificationUrl = verificationUrl;
-      order.updatedAt = Math.floor(Date.now() / 1000);
-      ordersCollection.update(order);
-    }
-  },
+  updateProofRequest: db.prepare(`
+    UPDATE orders
+    SET proofRequestId = @proofRequestId,
+        verificationUrl = @verificationUrl,
+        updatedAt = @updatedAt
+    WHERE id = @id
+  `),
 
   /**
    * Atualiza o status de um pedido pela externalReference (usada no webhook).
    */
-  updateStatus: ({ status, externalReference }) => {
-    if (!ordersCollection) initDatabase();
-    const order = ordersCollection.findOne({ externalReference });
-    if (order) {
-      order.status = status;
-      order.updatedAt = Math.floor(Date.now() / 1000);
-      ordersCollection.update(order);
-      return { changes: 1 };
-    }
-    return { changes: 0 };
-  },
+  updateStatus: db.prepare(`
+    UPDATE orders
+    SET status = @status,
+        updatedAt = @updatedAt
+    WHERE externalReference = @externalReference
+  `),
 
   /**
    * Busca um pedido pelo ID interno.
    */
-  getOrderById: (id) => {
-    if (!ordersCollection) initDatabase();
-    return ordersCollection.findOne({ id });
-  },
+  getOrderById: db.prepare(`
+    SELECT * FROM orders WHERE id = ?
+  `),
 
   /**
    * Busca um pedido pela externalReference.
    */
-  getOrderByRef: (externalReference) => {
-    if (!ordersCollection) initDatabase();
-    return ordersCollection.findOne({ externalReference });
-  },
+  getOrderByRef: db.prepare(`
+    SELECT * FROM orders WHERE externalReference = ?
+  `),
 };
+
+// dbReady é exportado apenas para manter compatibilidade com código existente
+export const dbReady = Promise.resolve();
 
 export default db;

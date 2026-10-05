@@ -25,8 +25,8 @@ router.get('/:id', (req, res) => {
     return res.status(200).json({
       id: order.id,
       status: order.status,
-      createdAt: order.created_at,
-      updatedAt: order.updated_at,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
     });
   } catch (err) {
     console.error('[Status] Erro:', err);

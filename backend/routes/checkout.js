@@ -5,16 +5,15 @@ import { stmts } from '../db.js';
 
 const router = express.Router();
 
-const YAID_API_BASE_URL = process.env.YAID_API_BASE_URL || 'https://api.yaid.com.br';
-const YAID_API_KEY = process.env.YAID_API_KEY;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-
 /**
  * POST /api/checkout
  * RF-BACK-02: Cria um Proof Request na YaID e retorna a verificationUrl.
  */
 router.post('/', async (req, res) => {
   try {
+    const YAID_API_BASE_URL = process.env.YAID_API_BASE_URL || 'https://yaid.com.br';
+    const YAID_API_KEY = process.env.YAID_API_KEY;
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
     if (!YAID_API_KEY) {
       return res.status(500).json({
         error: 'YAID_API_KEY não configurada. Verifique o arquivo .env do backend.',
@@ -26,21 +25,19 @@ router.post('/', async (req, res) => {
     const externalReference = `order_${orderId}`;
 
     // 2. Persiste o pedido como 'pending'
-    stmts.createOrder.run({ id: orderId, externalReference });
+    stmts.createOrder.run({ id: orderId, externalReference, createdAt: Math.floor(Date.now() / 1000), updatedAt: Math.floor(Date.now() / 1000) });
 
     // 3. Chama a API da YaID — POST /api/proof-requests
     const yaidResponse = await fetch(`${YAID_API_BASE_URL}/api/proof-requests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': YAID_API_KEY,
+        'Authorization': `Bearer ${YAID_API_KEY}`,
+        'x-api-key': YAID_API_KEY, // aceito como equivalente pela YaID
       },
       body: JSON.stringify({
         proofType: 'age_over_18',
         externalReference,
-        environment: 'homol',
-        redirectUrl: `${FRONTEND_URL}/success?orderId=${orderId}`,
-        cancelUrl: `${FRONTEND_URL}/failure?orderId=${orderId}`,
       }),
     });
 
@@ -73,6 +70,7 @@ router.post('/', async (req, res) => {
       id: orderId,
       proofRequestId: proofRequestId || null,
       verificationUrl,
+      updatedAt: Math.floor(Date.now() / 1000),
     });
 
     console.log(`[Checkout] Pedido criado: ${orderId} → ${verificationUrl}`);

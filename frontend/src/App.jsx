@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Success from './pages/Success';
 import Failure from './pages/Failure';
+import Redirecting from './pages/Redirecting';
 import './index.css';
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/redirecting" element={<Redirecting />} />
         <Route path="/success" element={<Success />} />
         <Route path="/failure" element={<Failure />} />
       </Routes>
