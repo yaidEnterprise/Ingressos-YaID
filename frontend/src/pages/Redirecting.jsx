@@ -33,7 +33,7 @@ export default function Redirecting() {
     const redirect = setTimeout(() => {
       setRedirected(true);
       window.location.href = verificationUrl;
-    }, 3000);
+    }, 5000);
 
     return () => {
       clearInterval(timer);

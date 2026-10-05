@@ -26,7 +26,6 @@ router.post('/', async (req, res) => {
 
     // 2. Persiste o pedido como 'pending'
     stmts.createOrder.run({ id: orderId, externalReference, createdAt: Math.floor(Date.now() / 1000), updatedAt: Math.floor(Date.now() / 1000) });
-    stmts.createOrder({ id: orderId, externalReference });
 
     // 3. Chama a API da YaID — POST /api/proof-requests
     const yaidResponse = await fetch(`${YAID_API_BASE_URL}/api/proof-requests`, {
@@ -67,7 +66,7 @@ router.post('/', async (req, res) => {
     }
 
     // 4. Atualiza o pedido com dados da YaID
-    stmts.updateProofRequest({
+    stmts.updateProofRequest.run({
       id: orderId,
       proofRequestId: proofRequestId || null,
       verificationUrl,
