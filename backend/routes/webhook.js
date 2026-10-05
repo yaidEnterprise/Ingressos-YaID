@@ -4,8 +4,6 @@ import { stmts } from '../db.js';
 
 const router = express.Router();
 
-const YAID_PUBLIC_KEY = process.env.YAID_PUBLIC_KEY;
-
 /**
  * Atualiza o status do pedido no banco de dados.
  * Executado de forma assíncrona para cumprir o RNF-02 (resposta rápida).
@@ -28,6 +26,7 @@ async function atualizarStatusDoIngresso(externalReference, isApproved) {
  */
 router.post('/', async (req, res) => {
   try {
+    const YAID_PUBLIC_KEY = process.env.YAID_PUBLIC_KEY;
     // 1. Verifica presença do header de assinatura
     const signatureHeader = req.headers['x-yaid-signature'];
     if (!signatureHeader) {

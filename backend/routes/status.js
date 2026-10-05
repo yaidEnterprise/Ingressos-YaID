@@ -15,7 +15,7 @@ router.get('/:id', (req, res) => {
       return res.status(400).json({ error: 'ID de pedido inválido.' });
     }
 
-    const order = stmts.getOrderById.get(id);
+    const order = stmts.getOrderById(id);
 
     if (!order) {
       return res.status(404).json({ error: 'Pedido não encontrado.' });
